@@ -1,0 +1,44 @@
+#!/sbin/runscript
+
+extra_commands="configtest"
+extra_started_commands="reload"
+
+depend() {
+	need net
+	need localmount
+}
+
+start_pre() {
+	KT_RUNDIR=$(dirname ${KT_PID})
+	checkpath -d ${KT_RUNDIR} -o ${KT_USER}
+}
+
+start() {
+	configtest || return 1
+	ebegin "Starting kyototycoon"
+		start-stop-daemon --start --user ${KT_USER}:${KT_GROUP} --exec /usr/bin/ktserver -- \
+		-dmn -pid ${KT_PID} -log ${KT_LOG} ${KT_OPTS} ${KT_DB}
+	eend $? "Failed to start kyototycoon"
+}
+
+stop() {
+	configtest || return 1
+	ebegin "Stopping kyototycoon"
+		start-stop-daemon --stop --pidfile ${KT_PID}
+	eend $? "Failed to stop kyototycoon"
+	rm -f ${KT_PID}
+}
+
+reload() {
+	configtest || return 1
+	ebegin "Gracefully restarting kyototycoon"
+		kill -HUP `cat ${KT_PID}` &>/dev/null
+	eend $? "Failed to reload kyototycoon"
+}
+
+configtest() {
+	if [ -z "${KT_DB}" ] || [ -z "${KT_PORT}" ] ; then
+		eerror "Please check your configuration"
+		eend $?
+	fi
+}
