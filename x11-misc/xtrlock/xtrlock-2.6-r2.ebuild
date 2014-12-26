@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/x11-misc/xtrlock/xtrlock-2.6.ebuild,v 1.1 2014/01/13 15:29:04 jer Exp $
 
 EAPI=5
-inherit toolchain-funcs
+inherit toolchain-funcs eutils
 
 #Note: there's no difference vs 2.0-12
 MY_P=${P/-/_}
